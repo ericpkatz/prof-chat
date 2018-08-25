@@ -23,7 +23,7 @@ class App extends Component{
     this.setState({ text: ev.target.value });
   }
   componentDidMount(){
-    this.ws = new WebSocket('ws://localhost:3000');
+    this.ws = new WebSocket(window.location.origin.replace('http', 'ws'));
     this.ws.addEventListener('message', (obj) => {
       const data = JSON.parse(obj.data);
       if(data.message){
