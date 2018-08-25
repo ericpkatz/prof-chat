@@ -13,7 +13,6 @@ let listeners = [];
 const messages = [];
 wss.on('connection', (client)=> {
   listeners.push(client);
-  console.log(messages);
   client.send(JSON.stringify({ messages }));
   client.on('message', function(data){
     const message = JSON.parse(data);
