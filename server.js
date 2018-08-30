@@ -9,20 +9,30 @@ const server = app.listen(port, ()=> console.log(`listening on port ${port}`));
 
 const wss = new Server({ server });
 
+const filterClient = (listeners, client)=> listeners.filter(listener => listener !== client);
+
+const broadcast = (listeners, client, message)=> {
+  filterClient(listeners, client).forEach( listener => {
+      listener.send(JSON.stringify(message));
+  });
+};
+
+const addClient = (listeners, client)=> {
+  return [...listeners, client];
+}
+
 let listeners = [];
 const messages = [];
 wss.on('connection', (client)=> {
-  listeners.push(client);
+  listeners = addClient(listeners, client);
   client.send(JSON.stringify({ messages }));
   client.on('message', function(data){
-    const message = JSON.parse(data);
-    messages.push(message.message);
-    listeners.filter( listener=> listener !== client).forEach( listener => {
-      listener.send(JSON.stringify(message));
-    });
+    const parsed = JSON.parse(data);
+    messages.push(parsed.message);
+    broadcast(listeners, client, parsed);
   });
   client.on('close', ()=> {
-    listeners = listeners.filter(listener => listener !== client);
+    listeners = filterClient(listeners, client);
   });
 });
 
